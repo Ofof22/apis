@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilgi Paylaşma</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    form {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+      color: #555;
+    }
+
+    input,
+    textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin: 5px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #fileList {
+      margin-right: 20px;
+    }
+
+    #fileContainer {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+    }
+
+    .file-name {
+      flex: 1;
+    }
+
+    .delete-button {
+      background-color: #FF6347;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .delete-button:hover {
+      background-color: #FF4500;
+    }
+  </style>
+</head>
+
+<body>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <h1>Özgün Bilgi Paylaşma</h1>
+    <label for="title">Başlık:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="file">Dosya Seç:</label>
+    <input type="file" id="file" name="file" accept=".js" required>
+
+    <button type="submit">Paylaş</button>
+  </form>
+
+  <form action="/share" method="post">
+    <h1>JSON'a Bilgi Ekleme</h1>
+    <label for="jsonTitle">Başlık:</label>
+    <input type="text" id="jsonTitle" name="title" required>
+
+    <label for="jsonDescription">Açıklama:</label>
+    <textarea id="jsonDescription" name="description" required></textarea>
+
+    <label for="jsonUrl">URL:</label>
+    <input type="text" id="jsonUrl" name="url" required>
+
+    <button type="submit">JSON'a Ekle</button>
+  </form>
+
+  <div id="fileList">
+    <h2>Dosyalar</h2>
+    <div id="fileContainer"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      fetch('/api/list')
+        .then(response => response.json())
+        .then(data => {
+          const sortedData = data.sort((a, b) => a.localeCompare(b)); // Dosyaları sırala
+          const fileContainer = document.getElementById('fileContainer');
+          
+          sortedData.forEach(file => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'file-container';
+
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.textContent = 'Sil';
+            deleteButton.onclick = function () {
+              deleteFile(file);
+            };
+
+            fileDiv.appendChild(fileName);
+            fileDiv.appendChild(deleteButton);
+            fileContainer.appendChild(fileDiv);
+          });
+        });
+    });
+
+    function deleteFile(fileName) {
+      fetch('/api/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileName }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Dosya başarıyla silindi.');
+            location.reload(); // Sayfayı yenilemek için
+          } else {
+            alert('Dosya silinirken bir hata oluştu.');
+          }
+        });
+    }
+  </script>
+
+</body>
+
+</html>

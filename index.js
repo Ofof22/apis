@@ -44,13 +44,16 @@ const loadAPIs = () => {
   });
 };
 
-// Uygulama başlatıldığında API'ları yükle
+// Uygulama başlatıldığında ilk kez API'ları yükle
 loadAPIs();
 
+// Her saniyede bir API'ları kontrol et
+setInterval(loadAPIs, 1000);
 app.get('/babacikamcik', (req, res) => {
   res.render('babacikamcik');
 });
 
+// API dosyalarını yükleme ve her saniye kontrol etme fonksiyonu
 
 // ...
 
